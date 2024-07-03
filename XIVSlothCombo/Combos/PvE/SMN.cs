@@ -68,9 +68,11 @@ namespace XIVSlothCombo.Combos.PvE
             MountainBuster = 25836,
             Slipstream = 25837,
 
+
             // Demi summons
             SummonBahamut = 7427,
             SummonPhoenix = 25831,
+            SummonLuxSolaris = 36997,
 
             // Demi summon abilities
             AstralImpulse = 25820,      // Single target Bahamut GCD
@@ -82,6 +84,11 @@ namespace XIVSlothCombo.Combos.PvE
             BrandOfPurgatory = 16515,   // AoE Phoenix GCD
             Rekindle = 25830,           // Healing oGCD Phoenix
             EnkindlePhoenix = 16516,
+
+            UmbralUmpulse = 36994,
+            UmbralFlare = 36995,
+            Sunflare = 36996,
+            EnkindleSolarBahamut = 36998,
 
             // Shared summon abilities
             AstralFlow = 25822,
@@ -103,6 +110,9 @@ namespace XIVSlothCombo.Combos.PvE
             Fester = 181,
             EnergySiphon = 16510,
             Painflare = 3578,
+            Necrotize = 36990,
+            SearingFlash = 36991,
+
 
             // Revive
             Resurrection = 173,
@@ -121,6 +131,7 @@ namespace XIVSlothCombo.Combos.PvE
                 TitansFavor = 2853,
                 IfritsFavor = 2724,
                 EverlastingFlight = 16517,
+                RubyGlimmer = 3873,
                 SearingLight = 2703;
         }
 
@@ -182,7 +193,7 @@ namespace XIVSlothCombo.Combos.PvE
 
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
-                if (actionID == Fester)
+                if (actionID == OriginalHook(Fester))
                 {
                     var gauge = GetJobGauge<SMNGauge>();
                     if (HasEffect(Buffs.FurtherRuin) && IsOnCooldown(EnergyDrain) && !gauge.HasAetherflowStacks && IsEnabled(CustomComboPreset.SMN_EDFester_Ruin4))
@@ -272,7 +283,7 @@ namespace XIVSlothCombo.Combos.PvE
                             if (!LevelChecked(SearingLight))
                             {
                                 if (STCombo)
-                                    return Fester;
+                                    return OriginalHook(Fester);
 
                                 if (AoECombo && LevelChecked(Painflare))
                                     return Painflare;
@@ -281,7 +292,7 @@ namespace XIVSlothCombo.Combos.PvE
                             if (HasEffect(Buffs.SearingLight))
                             {
                                 if (STCombo)
-                                    return Fester;
+                                    return OriginalHook(Fester);
 
                                 if (AoECombo && LevelChecked(Painflare))
                                     return Painflare;
@@ -358,6 +369,7 @@ namespace XIVSlothCombo.Combos.PvE
                 return actionID;
             }
         }
+
         internal class SMN_Advanced_Combo : CustomCombo
         {
             internal static uint DemiAttackCount = 0;
@@ -465,7 +477,7 @@ namespace XIVSlothCombo.Combos.PvE
                                     (SummonerBurstPhase == 4 && !HasEffect(Buffs.TitansFavor)))
                                 {
                                     if (STCombo)
-                                        return Fester;
+                                        return OriginalHook(Fester);
 
                                     if (AoECombo && LevelChecked(Painflare) && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling_Only))
                                         return Painflare;
@@ -501,7 +513,7 @@ namespace XIVSlothCombo.Combos.PvE
                                 if (IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling))
                                 {
                                     if (STCombo)
-                                        return Fester;
+                                        return OriginalHook(Fester);
 
                                     if (AoECombo && LevelChecked(Painflare))
                                         return Painflare;
@@ -512,7 +524,7 @@ namespace XIVSlothCombo.Combos.PvE
                                     if (!LevelChecked(SearingLight))
                                     {
                                         if (STCombo)
-                                            return Fester;
+                                            return OriginalHook(Fester);
 
                                         if (AoECombo && LevelChecked(Painflare) && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling_Only))
                                             return Painflare;
@@ -523,13 +535,18 @@ namespace XIVSlothCombo.Combos.PvE
                                         (SummonerBurstPhase == 4 && !HasEffect(Buffs.TitansFavor)))
                                     {
                                         if (STCombo)
-                                            return Fester;
+                                            return OriginalHook(Fester);
 
                                         if (AoECombo && LevelChecked(Painflare) && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling_Only))
                                             return Painflare;
                                     }
                                 }
                             }
+                        }
+
+                        if (HasEffect(Buffs.RubyGlimmer) && CanSpellWeave(actionID))
+                        {
+                            return SearingFlash;
                         }
 
                         // Lucid Dreaming
