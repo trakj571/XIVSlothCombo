@@ -482,6 +482,12 @@ namespace XIVSlothCombo.Combos.PvE
                                     if (AoECombo && LevelChecked(Painflare) && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling_Only))
                                         return Painflare;
                                 }
+
+
+                                if (HasEffect(Buffs.RubyGlimmer) && CanSpellWeave(actionID))
+                                {
+                                    return SearingFlash;
+                                }
                             }
                         }
 
@@ -539,15 +545,16 @@ namespace XIVSlothCombo.Combos.PvE
 
                                         if (AoECombo && LevelChecked(Painflare) && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling_Only))
                                             return Painflare;
+
+                                        if (HasEffect(Buffs.RubyGlimmer) && CanSpellWeave(actionID))
+                                        {
+                                            return SearingFlash;
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        if (HasEffect(Buffs.RubyGlimmer) && CanSpellWeave(actionID))
-                        {
-                            return SearingFlash;
-                        }
 
                         // Lucid Dreaming
                         if (IsEnabled(CustomComboPreset.SMN_Lucid) && ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= lucidThreshold)

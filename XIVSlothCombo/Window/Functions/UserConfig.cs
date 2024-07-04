@@ -1580,8 +1580,8 @@ namespace XIVSlothCombo.Window.Functions
                 UserConfig.DrawHorizontalRadioButton(GNB.Config.GNB_SkS, "2.5", "Options are friendly for 2.5 skill speed.", 2);
             }
 
-            if (preset == CustomComboPreset.GNB_ST_RoughDivide && enabled)
-                UserConfig.DrawSliderInt(0, 1, GNB.Config.GNB_RoughDivide_HeldCharges, "How many charges to keep ready? (0 = Use All)");
+            //if (preset == CustomComboPreset.GNB_ST_RoughDivide && enabled)
+            //    UserConfig.DrawSliderInt(0, 1, GNB.Config.GNB_RoughDivide_HeldCharges, "How many charges to keep ready? (0 = Use All)");
 
             if (preset == CustomComboPreset.GNB_Variant_Cure)
                 UserConfig.DrawSliderInt(1, 100, GNB.Config.GNB_VariantCure, "HP% to be at or under", 200);
@@ -2379,7 +2379,7 @@ namespace XIVSlothCombo.Window.Functions
             #region PvP
 
             if (preset == CustomComboPreset.SMNPvP_BurstMode)
-                UserConfig.DrawSliderInt(50, 100, SMNPvP.Config.SMNPvP_FesterThreshold, "Target HP% to cast Fester below.\nSet to 100 use Fester as soon as it's available.", 150, SliderIncrements.Ones);
+                UserConfig.DrawSliderInt(50, 100, SMNPvP.Config.SMNPvP_FesterThreshold, "Target HP% to cast OriginalHook(Fester) below.\nSet to 100 use OriginalHook(Fester) as soon as it's available.", 150, SliderIncrements.Ones);
 
             if (preset == CustomComboPreset.SMNPvP_BurstMode_RadiantAegis)
                 UserConfig.DrawSliderInt(0, 90, SMNPvP.Config.SMNPvP_RadiantAegisThreshold, "Caps at 90 to prevent waste.", 150, SliderIncrements.Ones);

@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Statuses;
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
+using XIVSlothCombo.CustomComboNS.Functions;
 
 namespace XIVSlothCombo.Combos.PvE
 {
@@ -37,7 +38,11 @@ namespace XIVSlothCombo.Combos.PvE
             BlastingZone = 16165,
             Bloodfest = 16164,
             Hypervelocity = 25759,
-            RoughDivide = 16154,
+            //RoughDivide = 16154,
+            ReignOfBeasts = 36937,
+            FatedBrand = 36936,
+            NobleBlood = 36938,
+            LionHeart = 36939,
             LightningShot = 16143;
 
         public static class Buffs
@@ -48,6 +53,9 @@ namespace XIVSlothCombo.Combos.PvE
                 ReadyToRip = 1842,
                 ReadyToTear = 1843,
                 ReadyToGouge = 1844,
+                ReadyToBreak = 3886,
+                ReadyToReign = 3840,
+                ReadyToRaze = 3839,
                 ReadyToBlast = 2686;
         }
 
@@ -62,7 +70,7 @@ namespace XIVSlothCombo.Combos.PvE
         {
             public const string
                 GNB_SkS = "GNB_SkS",
-                GNB_RoughDivide_HeldCharges = "GNB_RoughDivide_HeldCharges",
+                //GNB_RoughDivide_HeldCharges = "GNB_RoughDivide_HeldCharges",
                 GNB_VariantCure = "GNB_VariantCure";
         }
 
@@ -75,7 +83,7 @@ namespace XIVSlothCombo.Combos.PvE
                 if (actionID is KeenEdge)
                 {
                     var gauge = GetJobGauge<GNBGauge>();
-                    var roughDivideChargesRemaining = PluginConfiguration.GetCustomIntValue(Config.GNB_RoughDivide_HeldCharges);
+                    //var roughDivideChargesRemaining = PluginConfiguration.GetCustomIntValue(Config.GNB_RoughDivide_HeldCharges);
                     var quarterWeave = GetCooldownRemainingTime(actionID) < 1 && GetCooldownRemainingTime(actionID) > 0.6;
                     int SkSChoice = PluginConfiguration.GetCustomIntValue(Config.GNB_SkS);
                     bool slowSkS = SkSChoice is 2 && IsEnabled(CustomComboPreset.GNB_ST_SkSSupport);
@@ -174,12 +182,12 @@ namespace XIVSlothCombo.Combos.PvE
                         }
 
                         //Rough Divide Feature
-                        if (CanWeave(actionID) && LevelChecked(RoughDivide) && IsEnabled(CustomComboPreset.GNB_ST_RoughDivide) && GetRemainingCharges(RoughDivide) > roughDivideChargesRemaining && !IsMoving && !HasEffect(Buffs.ReadyToBlast))
-                        {
-                            if (IsNotEnabled(CustomComboPreset.GNB_ST_MeleeRoughDivide) ||
-                                (IsEnabled(CustomComboPreset.GNB_ST_MeleeRoughDivide) && GetTargetDistance() <= 1 && HasEffect(Buffs.NoMercy) && IsOnCooldown(OriginalHook(DangerZone)) && IsOnCooldown(BowShock)))
-                                return RoughDivide;
-                        }
+                        //if (CanWeave(actionID) && LevelChecked(RoughDivide) && IsEnabled(CustomComboPreset.GNB_ST_RoughDivide) && GetRemainingCharges(RoughDivide) > roughDivideChargesRemaining && !IsMoving && !HasEffect(Buffs.ReadyToBlast))
+                        //{
+                        //    if (IsNotEnabled(CustomComboPreset.GNB_ST_MeleeRoughDivide) ||
+                        //        (IsEnabled(CustomComboPreset.GNB_ST_MeleeRoughDivide) && GetTargetDistance() <= 1 && HasEffect(Buffs.NoMercy) && IsOnCooldown(OriginalHook(DangerZone)) && IsOnCooldown(BowShock)))
+                        //        return RoughDivide;
+                        //}
                     }
 
                     if (IsEnabled(CustomComboPreset.GNB_ST_Gnashing) && LevelChecked(Continuation) &&
@@ -195,13 +203,13 @@ namespace XIVSlothCombo.Combos.PvE
                             {
                                 if (IsEnabled(CustomComboPreset.GNB_ST_DoubleDown) && IsOffCooldown(DoubleDown) && gauge.Ammo >= 2 && !HasEffect(Buffs.ReadyToRip) && gauge.AmmoComboStep >= 1)
                                     return DoubleDown;
-                                if (IsEnabled(CustomComboPreset.GNB_ST_SonicBreak) && IsOffCooldown(SonicBreak) && IsOnCooldown(DoubleDown))
+                                if (IsEnabled(CustomComboPreset.GNB_ST_SonicBreak) && IsOffCooldown(SonicBreak) && IsOnCooldown(DoubleDown) && HasEffect(Buffs.ReadyToBreak) && CustomComboFunctions.LocalPlayer.Level != 100)
                                     return SonicBreak;
                             }
 
                             if (slowSkS)
                             {
-                                if (IsEnabled(CustomComboPreset.GNB_ST_SonicBreak) && IsOffCooldown(SonicBreak) && !HasEffect(Buffs.ReadyToRip) && gauge.AmmoComboStep >= 1)
+                                if (IsEnabled(CustomComboPreset.GNB_ST_SonicBreak) && IsOffCooldown(SonicBreak) && !HasEffect(Buffs.ReadyToRip) && gauge.AmmoComboStep >= 1 && HasEffect(Buffs.ReadyToBreak) && CustomComboFunctions.LocalPlayer.Level != 100)
                                     return SonicBreak;
                                 if (IsEnabled(CustomComboPreset.GNB_ST_DoubleDown) && IsOffCooldown(DoubleDown) && gauge.Ammo >= 2 && IsOnCooldown(SonicBreak))
                                     return DoubleDown;
@@ -210,7 +218,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (!LevelChecked(DoubleDown))
                         {
-                            if (IsEnabled(CustomComboPreset.GNB_ST_SonicBreak) && ActionReady(SonicBreak) && !HasEffect(Buffs.ReadyToRip) && IsOnCooldown(GnashingFang))
+                            if (IsEnabled(CustomComboPreset.GNB_ST_SonicBreak) && ActionReady(SonicBreak) && !HasEffect(Buffs.ReadyToRip) && IsOnCooldown(GnashingFang) && HasEffect(Buffs.ReadyToBreak))
                                 return SonicBreak;
                             //sub level 54 functionality
                             if (IsEnabled(CustomComboPreset.GNB_ST_BlastingZone) && ActionReady(DangerZone) && !LevelChecked(SonicBreak))
@@ -233,6 +241,15 @@ namespace XIVSlothCombo.Combos.PvE
                             return OriginalHook(GnashingFang);
                     }
 
+                    if (LevelChecked(NobleBlood) && HasEffect(Buffs.ReadyToReign))
+                    {
+                        return NobleBlood;
+                    }
+                    else if (lastComboMove == NobleBlood)
+                    {
+                        return LionHeart;
+                    }
+
                     if (IsEnabled(CustomComboPreset.GNB_ST_BurstStrike) && IsEnabled(CustomComboPreset.GNB_ST_MainCombo_CooldownsGroup))
                     {
                         if (HasEffect(Buffs.NoMercy) && gauge.AmmoComboStep == 0 && LevelChecked(BurstStrike))
@@ -246,6 +263,12 @@ namespace XIVSlothCombo.Combos.PvE
                         //final check if Burst Strike is used right before No Mercy ends
                         if (LevelChecked(Hypervelocity) && HasEffect(Buffs.ReadyToBlast))
                             return Hypervelocity;
+                    }
+
+                    //Sonic
+                    if (HasEffect(Buffs.ReadyToBreak) && CustomComboFunctions.LocalPlayer.Level == 100)
+                    {
+                        return SonicBreak;
                     }
 
                     // Regular 1-2-3 combo with overcap feature
@@ -458,7 +481,11 @@ namespace XIVSlothCombo.Combos.PvE
                             return DoubleDown;
                         if (IsEnabled(CustomComboPreset.GNB_AoE_Bloodfest) && gauge.Ammo != 0 && GetCooldownRemainingTime(Bloodfest) < 6 && LevelChecked(FatedCircle))
                             return FatedCircle;
+                    }
 
+                    if (LevelChecked(FatedBrand) && HasEffect(Buffs.ReadyToRaze))
+                    {
+                        return OriginalHook(Continuation);
                     }
 
                     if (comboTime > 0 && lastComboMove == DemonSlice && LevelChecked(DemonSlaughter))

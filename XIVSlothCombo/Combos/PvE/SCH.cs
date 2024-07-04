@@ -53,7 +53,8 @@ namespace XIVSlothCombo.Combos.PvE
             Aetherflow = 166,
             Recitation = 16542,
             ChainStratagem = 7436,
-            DeploymentTactics = 3585;
+            DeploymentTactics = 3585,
+            BanefulImpaction = 37012;
 
         //Action Groups
         internal static readonly List<uint>
@@ -367,6 +368,11 @@ namespace XIVSlothCombo.Combos.PvE
                         LocalPlayer.CurrentMp <= Config.SCH_ST_DPS_LucidOption &&
                         CanSpellWeave(actionID))
                         return All.LucidDreaming;
+
+                    if (ActionReady(All.LucidDreaming) &&
+                        LocalPlayer.CurrentMp <= Config.SCH_ST_DPS_LucidOption &&
+                        CanSpellWeave(actionID))
+                        return BanefulImpaction;
 
                     //Target based options
                     if (HasBattleTarget())

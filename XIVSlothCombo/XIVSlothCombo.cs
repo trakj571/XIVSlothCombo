@@ -37,7 +37,7 @@ namespace XIVSlothCombo
         internal static XIVSlothCombo P = null!;
         internal WindowSystem ws;
         private readonly HttpClient httpClient = new();
-        
+
         private readonly TextPayload starterMotd = new("[Sloth Message of the Day] ");
         private static uint? jobID;
 
@@ -52,19 +52,19 @@ namespace XIVSlothCombo
             DOL.JobID,
             DRG.JobID,
             DRK.JobID,
-            GNB.JobID,
-            MCH.JobID,
+            //GNB.JobID,
+            //MCH.JobID,
             MNK.JobID,
             NIN.JobID,
             PLD.JobID,
             RDM.JobID,
             RPR.JobID,
             SAM.JobID,
-            SCH.JobID,
+            //SCH.JobID,
             SGE.JobID,
-            SMN.JobID,
+            //SMN.JobID,
             WAR.JobID,
-            WHM.JobID
+            WHM.JobID,
         };
 
         public static readonly List<uint> DisabledJobsPVP = new List<uint>()
@@ -178,7 +178,7 @@ namespace XIVSlothCombo
         private static void OnFrameworkUpdate(IFramework framework)
         {
             if (Service.ClientState.LocalPlayer is not null)
-            JobID = Service.ClientState.LocalPlayer?.ClassJob?.Id;
+                JobID = Service.ClientState.LocalPlayer?.ClassJob?.Id;
 
             BlueMageService.PopulateBLUSpells();
         }
