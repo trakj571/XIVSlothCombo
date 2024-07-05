@@ -68,11 +68,10 @@ namespace XIVSlothCombo.Combos.PvE
             MountainBuster = 25836,
             Slipstream = 25837,
 
-
             // Demi summons
             SummonBahamut = 7427,
             SummonPhoenix = 25831,
-            SummonLuxSolaris = 36997,
+            SummonSolarBahamut = 36992,
 
             // Demi summon abilities
             AstralImpulse = 25820,      // Single target Bahamut GCD
@@ -84,11 +83,12 @@ namespace XIVSlothCombo.Combos.PvE
             BrandOfPurgatory = 16515,   // AoE Phoenix GCD
             Rekindle = 25830,           // Healing oGCD Phoenix
             EnkindlePhoenix = 16516,
-
-            UmbralUmpulse = 36994,
-            UmbralFlare = 36995,
-            Sunflare = 36996,
+            
+            UmbralImpulse = 36994,          //Single target Solar Bahamut GCD
+            UmbralFlare = 36995,            //AoE Solar Bahamut GCD
+            Sunflare = 36996,               //Damage oGCD Solar Bahamut
             EnkindleSolarBahamut = 36998,
+            LuxSolaris = 36997,             //Healing oGCD Solar Bahamut
 
             // Shared summon abilities
             AstralFlow = 25822,
@@ -110,9 +110,7 @@ namespace XIVSlothCombo.Combos.PvE
             Fester = 181,
             EnergySiphon = 16510,
             Painflare = 3578,
-            Necrotize = 36990,
             SearingFlash = 36991,
-
 
             // Revive
             Resurrection = 173,
@@ -131,8 +129,9 @@ namespace XIVSlothCombo.Combos.PvE
                 TitansFavor = 2853,
                 IfritsFavor = 2724,
                 EverlastingFlight = 16517,
-                RubyGlimmer = 3873,
-                SearingLight = 2703;
+                SearingLight = 2703,
+                RubysGlimmer = 3873,
+                RefulgentLux = 3874;
         }
 
         public static class Config
@@ -193,7 +192,7 @@ namespace XIVSlothCombo.Combos.PvE
 
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
-                if (actionID == OriginalHook(Fester))
+                if (actionID == Fester)
                 {
                     var gauge = GetJobGauge<SMNGauge>();
                     if (HasEffect(Buffs.FurtherRuin) && IsOnCooldown(EnergyDrain) && !gauge.HasAetherflowStacks && IsEnabled(CustomComboPreset.SMN_EDFester_Ruin4))
@@ -240,6 +239,12 @@ namespace XIVSlothCombo.Combos.PvE
                 var gauge = GetJobGauge<SMNGauge>();
                 var STCombo = actionID is Ruin or Ruin2;
                 var AoECombo = actionID is Outburst or Tridisaster;
+                var IsGarudaAttuned = OriginalHook(Gemshine) is EmeralRuin1 or EmeralRuin2 or EmeralRuin3 or EmeraldRite;
+                var IsTitanAttuned = OriginalHook(Gemshine) is TopazRuin1 or TopazRuin2 or TopazRuin3 or TopazRite;
+                var IsIfritAttuned = OriginalHook(Gemshine) is RubyRuin1 or RubyRuin2 or RubyRuin3 or RubyRite;
+                var IsBahamutReady = OriginalHook(Aethercharge) is SummonBahamut;
+                var IsPhoenixReady = OriginalHook(Aethercharge) is SummonPhoenix;
+                var IsSolarBahamutReady = OriginalHook(Aethercharge) is SummonSolarBahamut;
 
                 if (actionID is Ruin or Ruin2 or Outburst or Tridisaster)
                 {
@@ -254,7 +259,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (CanSpellWeave(actionID))
                     {
-                        if (IsOffCooldown(SearingLight) && LevelChecked(SearingLight) && OriginalHook(Ruin) == AstralImpulse)
+                        if (IsOffCooldown(SearingLight) && LevelChecked(SearingLight) && ((!LevelChecked(SummonSolarBahamut) && OriginalHook(Ruin) is AstralImpulse) || OriginalHook(Ruin) is UmbralImpulse))
                             return SearingLight;
 
                         if (!gauge.HasAetherflowStacks && IsOffCooldown(EnergyDrain))
@@ -266,16 +271,22 @@ namespace XIVSlothCombo.Combos.PvE
                                 return EnergySiphon;
                         }
 
-                        if (OriginalHook(Ruin) is AstralImpulse or FountainOfFire)
+                        if (HasEffect(Buffs.RubysGlimmer) && LevelChecked(SearingFlash))
+                            return SearingFlash;
+                        
+                        if (OriginalHook(Ruin) is AstralImpulse or UmbralImpulse or FountainOfFire)
                         {
                             if (IsOffCooldown(OriginalHook(EnkindleBahamut)) && LevelChecked(SummonBahamut))
                                 return OriginalHook(EnkindleBahamut);
 
-                            if (IsOffCooldown(Deathflare) && LevelChecked(Deathflare) && OriginalHook(Ruin) is AstralImpulse)
+                            if (IsOffCooldown(Deathflare) && LevelChecked(Deathflare) && OriginalHook(Ruin) is AstralImpulse or UmbralImpulse)
                                 return OriginalHook(AstralFlow);
 
                             if (IsOffCooldown(Rekindle) && OriginalHook(Ruin) is FountainOfFire)
                                 return OriginalHook(AstralFlow);
+                            
+                            if (IsOffCooldown(LuxSolaris) && HasEffect(Buffs.RefulgentLux))
+                                return OriginalHook(LuxSolaris);
                         }
 
                         if (gauge.HasAetherflowStacks && CanSpellWeave(actionID))
@@ -313,18 +324,18 @@ namespace XIVSlothCombo.Combos.PvE
                     {
                         if (LevelChecked(Slipstream) && HasEffect(Buffs.GarudasFavor))
                         {
-                            if (CanSpellWeave(actionID) && gauge.IsGarudaAttuned && IsOffCooldown(All.Swiftcast))
+                            if (CanSpellWeave(actionID) && IsGarudaAttuned && IsOffCooldown(All.Swiftcast))
                                 return All.Swiftcast;
 
                             if (HasEffect(Buffs.GarudasFavor) && HasEffect(All.Buffs.Swiftcast))
                                 return OriginalHook(AstralFlow);
                         }
 
-                        if (gauge.IsIfritAttuned && gauge.Attunement >= 1 && IsOffCooldown(All.Swiftcast))
+                        if (IsIfritAttuned && gauge.Attunement >= 1 && IsOffCooldown(All.Swiftcast))
                             return All.Swiftcast;
                     }
 
-                    if (gauge.IsIfritAttuned && gauge.Attunement >= 1 && HasEffect(All.Buffs.Swiftcast) && lastComboMove is not CrimsonCyclone)
+                    if (IsIfritAttuned && gauge.Attunement >= 1 && HasEffect(All.Buffs.Swiftcast) && lastComboMove is not CrimsonCyclone)
                     {
                         if (STCombo)
                             return OriginalHook(Gemshine);
@@ -335,13 +346,13 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if ((HasEffect(Buffs.GarudasFavor) && gauge.Attunement is 0) ||
                         (HasEffect(Buffs.TitansFavor) && lastComboMove is TopazRite or TopazCata && CanSpellWeave(actionID)) ||
-                        (HasEffect(Buffs.IfritsFavor) && (IsMoving || gauge.Attunement is 0)) || lastComboMove == CrimsonCyclone)
+                        (HasEffect(Buffs.IfritsFavor) && (IsMoving || gauge.Attunement is 0)) || (lastComboMove == CrimsonCyclone && InMeleeRange()))
                         return OriginalHook(AstralFlow);
 
-                    if (HasEffect(Buffs.FurtherRuin) && ((!HasEffect(All.Buffs.Swiftcast) && gauge.IsIfritAttuned && IsMoving) || (GetCooldownRemainingTime(OriginalHook(Aethercharge)) is < 2.5f and > 0)))
+                    if (HasEffect(Buffs.FurtherRuin) && ((!HasEffect(All.Buffs.Swiftcast) && IsIfritAttuned && IsMoving) || (GetCooldownRemainingTime(OriginalHook(Aethercharge)) is < 2.5f and > 0)))
                         return Ruin4;
 
-                    if (gauge.IsGarudaAttuned || gauge.IsTitanAttuned || gauge.IsIfritAttuned)
+                    if (IsGarudaAttuned || IsTitanAttuned || IsIfritAttuned)
                     {
                         if (STCombo)
                             return OriginalHook(Gemshine);
@@ -369,7 +380,6 @@ namespace XIVSlothCombo.Combos.PvE
                 return actionID;
             }
         }
-
         internal class SMN_Advanced_Combo : CustomCombo
         {
             internal static uint DemiAttackCount = 0;
@@ -387,6 +397,12 @@ namespace XIVSlothCombo.Combos.PvE
                 var inOpener = CombatEngageDuration().TotalSeconds < 40;
                 var STCombo = actionID is Ruin or Ruin2;
                 var AoECombo = actionID is Outburst or Tridisaster;
+                var IsGarudaAttuned = OriginalHook(Gemshine) is EmeralRuin1 or EmeralRuin2 or EmeralRuin3 or EmeraldRite;
+                var IsTitanAttuned = OriginalHook(Gemshine) is TopazRuin1 or TopazRuin2 or TopazRuin3 or TopazRite;
+                var IsIfritAttuned = OriginalHook(Gemshine) is RubyRuin1 or RubyRuin2 or RubyRuin3 or RubyRite;
+                var IsBahamutReady = OriginalHook(Aethercharge) is SummonBahamut;
+                var IsPhoenixReady = OriginalHook(Aethercharge) is SummonPhoenix;
+                var IsSolarBahamutReady = OriginalHook(Aethercharge) is SummonSolarBahamut;
 
                 if (WasLastAction(OriginalHook(Aethercharge))) DemiAttackCount = 0;    // Resets counter
 
@@ -397,7 +413,7 @@ namespace XIVSlothCombo.Combos.PvE
                 if (gauge.SummonTimerRemaining == 0 && !InCombat()) DemiAttackCount = 0;
 
                 //CHECK_DEMIATTACK_USE
-                if (UsedDemiAttack == false && lastComboMove is AstralImpulse or FountainOfFire or AstralFlare or BrandOfPurgatory && DemiAttackCount is not 6 && GetCooldownRemainingTime(AstralImpulse) > 1)
+                if (UsedDemiAttack == false && lastComboMove is AstralImpulse or UmbralImpulse or FountainOfFire or AstralFlare or UmbralFlare or BrandOfPurgatory && DemiAttackCount is not 6 && GetCooldownRemainingTime(AstralImpulse) > 1)
                 {
                     UsedDemiAttack = true;      // Registers that a Demi Attack was used and blocks further incrementation of DemiAttackCountCount
                     DemiAttackCount++;          // Increments DemiAttack counter
@@ -424,21 +440,21 @@ namespace XIVSlothCombo.Combos.PvE
                         {
                             if (IsEnabled(CustomComboPreset.SMN_SearingLight_Burst))
                             {
-                                if ((SummonerBurstPhase is 0 or 1 && OriginalHook(Ruin) == AstralImpulse) ||
+                                if (SummonerBurstPhase is 0 or 1 && ((!LevelChecked(SummonSolarBahamut) && OriginalHook(Ruin) is AstralImpulse) || OriginalHook(Ruin) is UmbralImpulse) ||
                                     (SummonerBurstPhase == 2 && OriginalHook(Ruin) == FountainOfFire) ||
-                                    (SummonerBurstPhase == 3 && OriginalHook(Ruin) is AstralImpulse or FountainOfFire) ||
+                                    (SummonerBurstPhase == 3 && OriginalHook(Ruin) is AstralImpulse or UmbralImpulse or FountainOfFire) ||
                                     (SummonerBurstPhase == 4))
                                 {
                                     if (STCombo || (AoECombo && IsNotEnabled(CustomComboPreset.SMN_SearingLight_STOnly)))
                                         return SearingLight;
                                 }
                             }
-
                             else return SearingLight;
                         }
 
                         // Emergency priority Demi Nuke to prevent waste if you can't get demi attacks out to satisfy the slider check.
-                        if (OriginalHook(Ruin) is AstralImpulse or FountainOfFire && GetCooldown(OriginalHook(Aethercharge)).CooldownElapsed >= 12.5)
+                        if (OriginalHook(Ruin) is AstralImpulse or UmbralImpulse or FountainOfFire && 
+                            IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Attacks) && GetCooldown(OriginalHook(Aethercharge)).CooldownElapsed >= 12.5)
                         {
                             if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Attacks))
                             {
@@ -447,12 +463,18 @@ namespace XIVSlothCombo.Combos.PvE
 
                                 if (IsOffCooldown(Deathflare) && LevelChecked(Deathflare) && OriginalHook(Ruin) is AstralImpulse)
                                     return OriginalHook(AstralFlow);
-                            }
 
-                            // Demi Nuke 2: Electric Boogaloo
-                            if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Rekindle))
-                            {
-                                if (IsOffCooldown(Rekindle) && OriginalHook(Ruin) is FountainOfFire)
+                                if (IsOffCooldown(OriginalHook(EnkindlePhoenix)) && LevelChecked(SummonPhoenix))
+                                    return OriginalHook(EnkindlePhoenix);
+                                
+                                if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Rekindle))
+                                    if (IsOffCooldown(Rekindle) && OriginalHook(Ruin) is FountainOfFire)
+                                        return OriginalHook(AstralFlow);
+
+                                if (IsOffCooldown(OriginalHook(EnkindleSolarBahamut)) && LevelChecked(SummonSolarBahamut))
+                                    return OriginalHook(EnkindleSolarBahamut);
+
+                                if (IsOffCooldown(Sunflare) && LevelChecked(Sunflare) && OriginalHook(Ruin) is UmbralImpulse)
                                     return OriginalHook(AstralFlow);
                             }
                         }
@@ -482,19 +504,16 @@ namespace XIVSlothCombo.Combos.PvE
                                     if (AoECombo && LevelChecked(Painflare) && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling_Only))
                                         return Painflare;
                                 }
-
-
-                                if (HasEffect(Buffs.RubyGlimmer) && CanSpellWeave(actionID))
-                                {
-                                    return SearingFlash;
-                                }
                             }
                         }
 
+                        if (IsEnabled(CustomComboPreset.SMN_SearingFlash) && HasEffect(Buffs.RubysGlimmer) && LevelChecked(SearingFlash))
+                            return SearingFlash;
+
                         // Demi Nuke
-                        if (OriginalHook(Ruin) is AstralImpulse or FountainOfFire)
+                        if (OriginalHook(Ruin) is AstralImpulse or UmbralImpulse or FountainOfFire)
                         {
-                            if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Attacks) && DemiAttackCount >= burstDelay)
+                            if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Attacks) && IsBahamutReady && (!LevelChecked(SummonSolarBahamut) || DemiAttackCount >= burstDelay))
                             {
                                 if (IsOffCooldown(OriginalHook(EnkindleBahamut)) && LevelChecked(SummonBahamut))
                                     return OriginalHook(EnkindleBahamut);
@@ -504,10 +523,26 @@ namespace XIVSlothCombo.Combos.PvE
                             }
 
                             // Demi Nuke 2: Electric Boogaloo
-                            if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Rekindle))
+                            if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Attacks) && IsPhoenixReady)
                             {
-                                if (IsOffCooldown(Rekindle) && OriginalHook(Ruin) is FountainOfFire)
+                                if (IsOffCooldown(OriginalHook(EnkindlePhoenix)) && LevelChecked(SummonPhoenix) && OriginalHook(Ruin) is FountainOfFire)
+                                    return OriginalHook(EnkindlePhoenix);
+                                
+                                if (IsOffCooldown(Rekindle) && IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Rekindle) && OriginalHook(Ruin) is FountainOfFire)
                                     return OriginalHook(AstralFlow);
+                            }
+                            
+                            // Demi Nuke 3: More Boogaloo
+                            if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_Attacks) && IsSolarBahamutReady && DemiAttackCount >= burstDelay)
+                            {
+                                if (IsOffCooldown(OriginalHook(EnkindleSolarBahamut)) && LevelChecked(SummonSolarBahamut))
+                                    return OriginalHook(EnkindleSolarBahamut);
+
+                                if (IsOffCooldown(Sunflare) && LevelChecked(Sunflare) && OriginalHook(Ruin) is UmbralImpulse)
+                                    return OriginalHook(AstralFlow);
+                                
+                                if (IsOffCooldown(LuxSolaris) && IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons_LuxSolaris) && HasEffect(Buffs.RefulgentLux))
+                                    return OriginalHook(LuxSolaris);
                             }
                         }
 
@@ -545,16 +580,10 @@ namespace XIVSlothCombo.Combos.PvE
 
                                         if (AoECombo && LevelChecked(Painflare) && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_oGCDPooling_Only))
                                             return Painflare;
-
-                                        if (HasEffect(Buffs.RubyGlimmer) && CanSpellWeave(actionID))
-                                        {
-                                            return SearingFlash;
-                                        }
                                     }
                                 }
                             }
                         }
-
 
                         // Lucid Dreaming
                         if (IsEnabled(CustomComboPreset.SMN_Lucid) && ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= lucidThreshold)
@@ -564,16 +593,17 @@ namespace XIVSlothCombo.Combos.PvE
                     // Demi
                     if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_DemiSummons))
                     {
-                        if (InCombat() && gauge.SummonTimerRemaining == 0 && IsOffCooldown(OriginalHook(Aethercharge)) &&
-                            ((LevelChecked(Aethercharge) && !LevelChecked(SummonBahamut)) ||   // Pre-Bahamut Phase
-                             (gauge.IsBahamutReady && LevelChecked(SummonBahamut)) ||            // Bahamut Phase
-                             (gauge.IsPhoenixReady && LevelChecked(SummonPhoenix))))             // Phoenix Phase
+                        if (gauge.SummonTimerRemaining == 0 && IsOffCooldown(OriginalHook(Aethercharge)) &&
+                            ((LevelChecked(Aethercharge) && !LevelChecked(SummonBahamut) && InCombat()) ||   // Pre-Bahamut Phase
+                             (IsBahamutReady && LevelChecked(SummonBahamut)) ||            // Bahamut Phase
+                             (IsPhoenixReady && LevelChecked(SummonPhoenix)) ||            // Phoenix Phase
+                             (IsSolarBahamutReady && LevelChecked(SummonSolarBahamut))))   // Solar Bahamut Phase
                             return OriginalHook(Aethercharge);
                     }
 
                     //Ruin4 in Egi Phases
                     if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_Ruin4) && HasEffect(Buffs.FurtherRuin) &&
-                        ((!HasEffect(All.Buffs.Swiftcast) && IsMoving && ((HasEffect(Buffs.GarudasFavor) && !gauge.IsGarudaAttuned) || (gauge.IsIfritAttuned && lastComboMove is not CrimsonCyclone))) ||
+                        ((!HasEffect(All.Buffs.Swiftcast) && IsMoving && ((HasEffect(Buffs.GarudasFavor) && !IsGarudaAttuned) || (IsIfritAttuned && lastComboMove is not CrimsonCyclone))) ||
                         GetCooldownRemainingTime(OriginalHook(Aethercharge)) is < 2.5f and > 0))
                         return Ruin4;
 
@@ -583,7 +613,7 @@ namespace XIVSlothCombo.Combos.PvE
                         // Swiftcast Garuda Feature
                         if (swiftcastPhase is 0 or 1 && LevelChecked(Slipstream) && HasEffect(Buffs.GarudasFavor))
                         {
-                            if (CanSpellWeave(actionID) && gauge.IsGarudaAttuned && IsOffCooldown(All.Swiftcast))
+                            if (CanSpellWeave(actionID) && IsGarudaAttuned && IsOffCooldown(All.Swiftcast))
                             {
                                 if (STCombo || (AoECombo && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_SwiftcastEgi_Only)))
                                     return All.Swiftcast;
@@ -597,7 +627,7 @@ namespace XIVSlothCombo.Combos.PvE
                         // Swiftcast Ifrit Feature (Conditions to allow for SpS Ruins to still be under the effect of Swiftcast)
                         if (swiftcastPhase == 2)
                         {
-                            if (IsOffCooldown(All.Swiftcast) && gauge.IsIfritAttuned && lastComboMove is not CrimsonCyclone)
+                            if (IsOffCooldown(All.Swiftcast) && IsIfritAttuned && lastComboMove is not CrimsonCyclone)
                             {
                                 if (!Config.SMN_ST_Egi_AstralFlow[1] || (Config.SMN_ST_Egi_AstralFlow[1] && gauge.Attunement >= 1))
                                 {
@@ -613,7 +643,7 @@ namespace XIVSlothCombo.Combos.PvE
                             // Swiftcast Garuda Feature
                             if (LevelChecked(Slipstream) && HasEffect(Buffs.GarudasFavor))
                             {
-                                if (CanSpellWeave(actionID) && gauge.IsGarudaAttuned && IsOffCooldown(All.Swiftcast))
+                                if (CanSpellWeave(actionID) && IsGarudaAttuned && IsOffCooldown(All.Swiftcast))
                                 {
                                     if (STCombo || (AoECombo && IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_SwiftcastEgi_Only)))
                                         return All.Swiftcast;
@@ -625,7 +655,7 @@ namespace XIVSlothCombo.Combos.PvE
                             }
 
                             // Swiftcast Ifrit Feature (Conditions to allow for SpS Ruins to still be under the effect of Swiftcast)
-                            if (IsOffCooldown(All.Swiftcast) && gauge.IsIfritAttuned && lastComboMove is not CrimsonCyclone)
+                            if (IsOffCooldown(All.Swiftcast) && IsIfritAttuned && lastComboMove is not CrimsonCyclone)
                             {
                                 if (!Config.SMN_ST_Egi_AstralFlow[1] || (Config.SMN_ST_Egi_AstralFlow[1] && gauge.Attunement >= 1))
                                 {
@@ -638,7 +668,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                     // Gemshine/Precious Brilliance priority casting
                     if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_EgiSummons_Attacks) &&
-                        ((gauge.IsIfritAttuned && gauge.Attunement >= 1 && HasEffect(All.Buffs.Swiftcast) && lastComboMove is not CrimsonCyclone) ||
+                        ((IsIfritAttuned && gauge.Attunement >= 1 && HasEffect(All.Buffs.Swiftcast) && lastComboMove is not CrimsonCyclone) ||
                         (HasEffect(Buffs.GarudasFavor) && gauge.Attunement >= 1 && !HasEffect(All.Buffs.Swiftcast) && IsMoving)))
                     {
                         if (STCombo)
@@ -650,12 +680,12 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if ((Config.SMN_ST_Egi_AstralFlow[2] && HasEffect(Buffs.GarudasFavor) && (IsNotEnabled(CustomComboPreset.SMN_DemiEgiMenu_SwiftcastEgi) || swiftcastPhase == 2)) ||                 // Garuda
                         (Config.SMN_ST_Egi_AstralFlow[0] && HasEffect(Buffs.TitansFavor) && lastComboMove is TopazRite or TopazCata && CanSpellWeave(actionID)) ||                                  // Titan
-                        (Config.SMN_ST_Egi_AstralFlow[1] && HasEffect(Buffs.IfritsFavor) && !Config.SMN_ST_CrimsonCycloneMelee && (IsMoving || gauge.Attunement == 0 || (lastComboMove is CrimsonCyclone && InMeleeRange()))) ||
+                        (Config.SMN_ST_Egi_AstralFlow[1] && (HasEffect(Buffs.IfritsFavor) && !Config.SMN_ST_CrimsonCycloneMelee && (IsMoving || gauge.Attunement == 0) || (lastComboMove is CrimsonCyclone && InMeleeRange()))) ||
                         (Config.SMN_ST_Egi_AstralFlow[1] && HasEffect(Buffs.IfritsFavor) && Config.SMN_ST_CrimsonCycloneMelee && InMeleeRange()))  // Ifrit
                         return OriginalHook(AstralFlow);
 
                     // Gemshine/Precious Brilliance
-                    if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_EgiSummons_Attacks) && (gauge.IsGarudaAttuned || gauge.IsTitanAttuned || gauge.IsIfritAttuned))
+                    if (IsEnabled(CustomComboPreset.SMN_Advanced_Combo_EgiSummons_Attacks) && (IsGarudaAttuned || IsTitanAttuned || IsIfritAttuned))
                     {
                         if (STCombo)
                             return OriginalHook(Gemshine);
@@ -665,7 +695,7 @@ namespace XIVSlothCombo.Combos.PvE
                     }
 
                     // Egi Order
-                    if (IsEnabled(CustomComboPreset.SMN_DemiEgiMenu_EgiOrder) && gauge.SummonTimerRemaining == 0 && IsOnCooldown(SummonPhoenix) && IsOnCooldown(SummonBahamut))
+                    if (IsEnabled(CustomComboPreset.SMN_DemiEgiMenu_EgiOrder) && gauge.SummonTimerRemaining == 0)
                     {
                         if (gauge.IsIfritReady && !gauge.IsTitanReady && !gauge.IsGarudaReady && LevelChecked(SummonRuby))
                             return OriginalHook(SummonRuby);
@@ -762,6 +792,9 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if ((OriginalHook(AstralFlow) is Deathflare && IsOffCooldown(Deathflare)) || (OriginalHook(AstralFlow) is Rekindle && IsOffCooldown(Rekindle)))
                         return OriginalHook(AstralFlow);
+                    
+                    if (OriginalHook(AstralFlow) is Sunflare && IsOffCooldown(Sunflare))
+                        return OriginalHook(Sunflare);
                 }
 
                 return actionID;

@@ -54,9 +54,9 @@ namespace XIVSlothCombo
             DRK.JobID,
             //GNB.JobID,
             //MCH.JobID,
-            MNK.JobID,
+            //MNK.JobID,
             NIN.JobID,
-            PLD.JobID,
+            //PLD.JobID,
             RDM.JobID,
             RPR.JobID,
             SAM.JobID,
@@ -178,7 +178,7 @@ namespace XIVSlothCombo
         private static void OnFrameworkUpdate(IFramework framework)
         {
             if (Service.ClientState.LocalPlayer is not null)
-                JobID = Service.ClientState.LocalPlayer?.ClassJob?.Id;
+            JobID = Service.ClientState.LocalPlayer?.ClassJob?.Id;
 
             BlueMageService.PopulateBLUSpells();
         }

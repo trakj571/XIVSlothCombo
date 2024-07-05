@@ -25,7 +25,7 @@ namespace XIVSlothCombo.Combos.PvE
             FourPointFury = 16473,
             PerfectBalance = 69,
             TrueStrike = 54,
-            Meditation = 3546,
+            SteeledMeditation = 36940,
             HowlingFist = 25763,
             Enlightenment = 16474,
             MasterfulBlitz = 25764,
@@ -116,7 +116,7 @@ namespace XIVSlothCombo.Combos.PvE
                     {
                         if (gauge.Chakra < 5 && level >= Levels.Meditation)
                         {
-                            return Meditation;
+                            return OriginalHook(SteeledMeditation);
                         }
 
                         if (level >= Levels.FormShift && !HasEffect(Buffs.FormlessFist) && comboTime <= 0)
@@ -180,7 +180,7 @@ namespace XIVSlothCombo.Combos.PvE
                         if (IsEnabled(CustomComboPreset.MNK_AoE_Simple_Meditation) && level >= Levels.Meditation && gauge.Chakra == 5 && (HasEffect(Buffs.DisciplinedFist) ||
                             level < Levels.TwinSnakes) && canWeaveChakra)
                         {
-                            return level >= Levels.Enlightenment ? OriginalHook(Enlightenment) : OriginalHook(Meditation);
+                            return level >= Levels.Enlightenment ? OriginalHook(Enlightenment) : OriginalHook(OriginalHook(SteeledMeditation));
                         }
 
                         // healing - please move if not appropriate this high priority
@@ -312,8 +312,8 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (HasEffect(Buffs.CoerlForm) && level >= Levels.SnapPunch)
                     {
-                        if (!TargetHasEffect(Debuffs.Demolish) && level >= Levels.Demolish)
-                            return Demolish;
+                        //if (!TargetHasEffect(Debuffs.Demolish) && level >= Levels.Demolish)
+                        //    return Demolish;
                         return SnapPunch;
                     }
 
@@ -358,7 +358,7 @@ namespace XIVSlothCombo.Combos.PvE
                     var canWeave = CanWeave(actionID, 0.5);
                     var canDelayedWeave = CanWeave(actionID, 0.0) && GetCooldown(actionID).CooldownRemaining < 0.7;
                     var twinsnakeDuration = GetBuffRemainingTime(Buffs.DisciplinedFist);
-                    var demolishDuration = GetDebuffRemainingTime(Debuffs.Demolish);
+                    //var demolishDuration = GetDebuffRemainingTime(Debuffs.Demolish);
                     var pbStacks = FindEffectAny(Buffs.PerfectBalance);
                     var lunarNadi = gauge.Nadi == Nadi.LUNAR;
                     var solarNadi = gauge.Nadi == Nadi.SOLAR;
@@ -436,7 +436,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                                         if (gauge.Chakra == 5)
                                         {
-                                            return OriginalHook(Meditation);
+                                            return OriginalHook(OriginalHook(SteeledMeditation));
                                         }
                                     }
 
@@ -465,7 +465,7 @@ namespace XIVSlothCombo.Combos.PvE
                     {
                         if (!inOpener && gauge.Chakra < 5 && level >= Levels.Meditation)
                         {
-                            return Meditation;
+                            return OriginalHook(SteeledMeditation);
                         }
 
                         if (!inOpener && level >= Levels.FormShift && !HasEffect(Buffs.FormlessFist) && comboTime <= 0)
@@ -525,11 +525,16 @@ namespace XIVSlothCombo.Combos.PvE
 
                                 if (TargetNeedsPositionals() && IsEnabled(CustomComboPreset.MNK_TrueNorthDynamic) && LevelChecked(All.TrueNorth) && GetRemainingCharges(All.TrueNorth) > 0 && !HasEffect(All.Buffs.TrueNorth) && LevelChecked(Demolish) && HasEffect(Buffs.CoerlForm))
                                 {
-                                    if (!TargetHasEffect(Debuffs.Demolish) || demolishDuration <= PluginConfiguration.GetCustomFloatValue(Config.MNK_Demolish_Apply))
-                                    {
-                                        if (!OnTargetsRear())
-                                            return All.TrueNorth;
-                                    }
+                                    //if (!TargetHasEffect(Debuffs.Demolish) || demolishDuration <= PluginConfiguration.GetCustomFloatValue(Config.MNK_Demolish_Apply))
+                                    //{
+                                    //    if (!OnTargetsRear())
+                                    //        return All.TrueNorth;
+                                    //}
+                                 
+
+                                    if (!OnTargetsRear())
+                                        return All.TrueNorth;
+
                                     else if (!OnTargetsFlank())
                                         return All.TrueNorth;
                                 }
@@ -566,7 +571,7 @@ namespace XIVSlothCombo.Combos.PvE
                             {
                                 if (level < Levels.RiddleOfFire || !IsEnabled(CustomComboPreset.MNK_ST_Simple_CDs) || (GetCooldownRemainingTime(RiddleOfFire) >= 1.5 && IsOnCooldown(RiddleOfFire) && lastComboMove != RiddleOfFire))
                                 {
-                                    return OriginalHook(Meditation);
+                                    return OriginalHook(OriginalHook(SteeledMeditation));
                                 }
                             }
                         }
@@ -597,12 +602,7 @@ namespace XIVSlothCombo.Combos.PvE
                             }
                             if (lunarNadi && !solarNadi)
                             {
-                                bool demolishFirst = !TargetHasEffect(Debuffs.Demolish);
-                                if (!demolishFirst && HasEffect(Buffs.DisciplinedFist))
-                                {
-                                    demolishFirst = twinsnakeDuration >= demolishDuration;
-                                }
-                                return demolishFirst ? Demolish : TwinSnakes;
+                                return TwinSnakes;
                             }
                         }
                         if (canSolar && (lunarNadi || !solarNadi))
@@ -611,18 +611,18 @@ namespace XIVSlothCombo.Combos.PvE
                             {
                                 return TwinSnakes;
                             }
-                            if (!coeurlChakra && (!TargetHasEffect(Debuffs.Demolish) || demolishDuration <= 2.5))
-                            {
-                                return Demolish;
-                            }
+                            //if (!coeurlChakra && (!TargetHasEffect(Debuffs.Demolish) || demolishDuration <= 2.5))
+                            //{
+                            //    return Demolish;
+                            //}
                         }
                         return HasEffect(Buffs.LeadenFist) ? Bootshine : DragonKick;
                     }
 
                     // Monk Rotation
-                    if (IsEnabled(CustomComboPreset.MNK_ST_Meditation_Uptime) && !InMeleeRange() && gauge.Chakra < 5 && LevelChecked(Meditation))
+                    if (IsEnabled(CustomComboPreset.MNK_ST_Meditation_Uptime) && !InMeleeRange() && gauge.Chakra < 5 && LevelChecked(OriginalHook(SteeledMeditation)))
                     {
-                        return Meditation;
+                        return OriginalHook(SteeledMeditation);
                     }
 
                     if (!HasEffect(Buffs.PerfectBalance))
@@ -650,7 +650,8 @@ namespace XIVSlothCombo.Combos.PvE
                     {
                         return !LevelChecked(SnapPunch)
                             ? Bootshine
-                            : !LevelChecked(Demolish) || (demolishDuration >= PluginConfiguration.GetCustomFloatValue(Config.MNK_Demolish_Apply))
+                                //: !LevelChecked(Demolish) || (demolishDuration >= PluginConfiguration.GetCustomFloatValue(Config.MNK_Demolish_Apply))
+                                : !LevelChecked(Demolish)
                                 ? SnapPunch
                                 : Demolish;
                     }
@@ -734,9 +735,10 @@ namespace XIVSlothCombo.Combos.PvE
                 {
                     var gauge = GetJobGauge<MNKGauge>();
 
+
                     if (gauge.Chakra < 5)
                     {
-                        return Meditation;
+                        return OriginalHook(SteeledMeditation);
                     }
                 }
                 return actionID;
