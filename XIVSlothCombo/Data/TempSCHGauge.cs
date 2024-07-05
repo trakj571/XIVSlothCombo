@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.JobGauge.Types;
 using ECommons.DalamudServices;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using XIVSlothCombo.Services;
 
@@ -50,6 +51,23 @@ public unsafe class TmpVPRGauge
     }
 }
 
+public unsafe class TmpMNKGauge
+{
+    public byte Chakra => Struct-> Chakra;
+
+    public unsafe BeastChakra[] BeastChakra => Struct->BeastChakra;
+    public unsafe Nadi Nadi => Struct->Nadi;
+
+    public unsafe ushort BlitzTimeRemaining => Struct->BlitzTimeRemaining;
+
+    private protected TmpMonkGauge* Struct;
+
+    public TmpMNKGauge()
+    {
+        Struct = (TmpMonkGauge*)Service.JobGauges.Get<MNKGauge>().Address;
+    }
+}
+
 
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
 public struct TmpScholarGauge
@@ -67,6 +85,16 @@ public struct ViperGauge
     [FieldOffset(0x0A)] public byte SerpentsOfferings;
     [FieldOffset(0x09)] public byte AnguineTribute;
     [FieldOffset(0x0B)] public DreadwinderPit DreadwinderPitCombo;
+}
+
+
+[StructLayout(LayoutKind.Explicit, Size = 0x10)]
+public struct TmpMonkGauge
+{
+    [FieldOffset(0x08)] public byte Chakra;
+    [FieldOffset(0x09)] public unsafe BeastChakra[] BeastChakra;
+    [FieldOffset(0x09)] public Nadi Nadi;
+    [FieldOffset(0x0B)] public ushort BlitzTimeRemaining;
 }
 
 public enum DreadwinderPit : byte

@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.JobGauge.Types;
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
+using XIVSlothCombo.Data;
 using XIVSlothCombo.Extensions;
 
 namespace XIVSlothCombo.Combos.PvE
@@ -233,7 +234,7 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(Buffs.RaptorForm))
                     {
                         if (FourPointFury.LevelChecked())
-                        return FourPointFury;
+                            return FourPointFury;
 
                         if (TwinSnakes.LevelChecked())
                             return TwinSnakes;
@@ -357,7 +358,7 @@ namespace XIVSlothCombo.Combos.PvE
                     var gauge = GetJobGauge<MNKGauge>();
                     var canWeave = CanWeave(actionID, 0.5);
                     var canDelayedWeave = CanWeave(actionID, 0.0) && GetCooldown(actionID).CooldownRemaining < 0.7;
-                    var twinsnakeDuration = GetBuffRemainingTime(Buffs.DisciplinedFist);
+                    //var twinsnakeDuration = GetBuffRemainingTime(Buffs.DisciplinedFist);
                     //var demolishDuration = GetDebuffRemainingTime(Debuffs.Demolish);
                     var pbStacks = FindEffectAny(Buffs.PerfectBalance);
                     var lunarNadi = gauge.Nadi == Nadi.LUNAR;
@@ -493,8 +494,11 @@ namespace XIVSlothCombo.Combos.PvE
                             if (canWeave)
                             {
 
+                                //if (IsEnabled(CustomComboPreset.MNK_ST_Simple_CDs_PerfectBalance) && !HasEffect(Buffs.FormlessFist) &&
+                                //    level >= Levels.PerfectBalance && !HasEffect(Buffs.PerfectBalance) && HasEffect(Buffs.DisciplinedFist) &&
+                                //    OriginalHook(MasterfulBlitz) == MasterfulBlitz)
                                 if (IsEnabled(CustomComboPreset.MNK_ST_Simple_CDs_PerfectBalance) && !HasEffect(Buffs.FormlessFist) &&
-                                    level >= Levels.PerfectBalance && !HasEffect(Buffs.PerfectBalance) && HasEffect(Buffs.DisciplinedFist) &&
+                                    level >= Levels.PerfectBalance && !HasEffect(Buffs.PerfectBalance) &&
                                     OriginalHook(MasterfulBlitz) == MasterfulBlitz)
                                 {
                                     // Use Perfect Balance if:
@@ -518,7 +522,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                             if (canDelayedWeave)
                             {
-                                if (level >= Levels.RiddleOfFire && !IsOnCooldown(RiddleOfFire) && HasEffect(Buffs.DisciplinedFist))
+                                if (level >= Levels.RiddleOfFire && !IsOnCooldown(RiddleOfFire))
                                 {
                                     return RiddleOfFire;
                                 }
@@ -530,7 +534,7 @@ namespace XIVSlothCombo.Combos.PvE
                                     //    if (!OnTargetsRear())
                                     //        return All.TrueNorth;
                                     //}
-                                 
+
 
                                     if (!OnTargetsRear())
                                         return All.TrueNorth;
@@ -567,7 +571,8 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (canWeave)
                         {
-                            if (IsEnabled(CustomComboPreset.MNK_ST_Simple_Meditation) && level >= Levels.Meditation  && gauge.Chakra == 5 && (HasEffect(Buffs.DisciplinedFist) || level < Levels.TwinSnakes))
+                            //if (IsEnabled(CustomComboPreset.MNK_ST_Simple_Meditation) && level >= Levels.Meditation  && gauge.Chakra == 5 && (HasEffect(Buffs.DisciplinedFist) || level < Levels.TwinSnakes))
+                            if (IsEnabled(CustomComboPreset.MNK_ST_Simple_Meditation) && level >= Levels.Meditation && gauge.Chakra == 5 && level < Levels.TwinSnakes)
                             {
                                 if (level < Levels.RiddleOfFire || !IsEnabled(CustomComboPreset.MNK_ST_Simple_CDs) || (GetCooldownRemainingTime(RiddleOfFire) >= 1.5 && IsOnCooldown(RiddleOfFire) && lastComboMove != RiddleOfFire))
                                 {
@@ -607,7 +612,7 @@ namespace XIVSlothCombo.Combos.PvE
                         }
                         if (canSolar && (lunarNadi || !solarNadi))
                         {
-                            if (!raptorChakra && (!HasEffect(Buffs.DisciplinedFist) || twinsnakeDuration <= 2.5))
+                            if (!raptorChakra)
                             {
                                 return TwinSnakes;
                             }
@@ -637,12 +642,12 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (!HasEffect(Buffs.FormlessFist) && HasEffect(Buffs.RaptorForm))
                     {
-                        if (!LevelChecked(TrueStrike)) 
+                        if (!LevelChecked(TrueStrike))
                         {
                             return Bootshine;
                         }
 
-                        return !LevelChecked(TwinSnakes) || (twinsnakeDuration >= PluginConfiguration.GetCustomFloatValue(Config.MNK_DisciplinedFist_Apply))
+                        return !LevelChecked(TwinSnakes)
                             ? TrueStrike
                             : TwinSnakes;
                     }
@@ -669,6 +674,7 @@ namespace XIVSlothCombo.Combos.PvE
                 if (actionID == MasterfulBlitz)
                 {
                     var gauge = GetJobGauge<MNKGauge>();
+                    //var gauge2 = new TmpMNKGauge();
                     var pbStacks = FindEffectAny(Buffs.PerfectBalance);
                     var lunarNadi = gauge.Nadi == Nadi.LUNAR;
                     var nadiNONE = gauge.Nadi == Nadi.NONE;
